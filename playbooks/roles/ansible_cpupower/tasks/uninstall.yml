@@ -1,0 +1,32 @@
+---
+- name: Check presence of cpupower service file
+  stat:
+    path: "/etc/systemd/system/cpupower.service"
+  register: cpupower_service_file
+
+- name: Disable cpupower service
+  when: cpupower_service_file.stat.exists
+  become: true
+  service:
+    name: cpupower.service
+    enabled: false
+    state: stopped
+
+- name: Uninstall systemd service
+  become: true
+  file:
+    path: "/etc/systemd/system/cpupower.service"
+    state: absent
+  notify: systemd-daemon-reload
+
+- name: Uninstall start-up script
+  become: true
+  file:
+    path: "{{ cpupower_startup_script_filename }}"
+    state: absent
+
+- name: Un-install requirements
+  become: true
+  package:
+    name: "{{ cpupower_package_name }}"
+    state: absent

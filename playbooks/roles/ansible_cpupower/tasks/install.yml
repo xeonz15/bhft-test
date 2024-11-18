@@ -1,0 +1,6 @@
+---
+- name: Install requirements
+  become: true
+  package:
+    name: "{{ cpupower_package_name }}"
+    state: present

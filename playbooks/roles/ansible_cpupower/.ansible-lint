@@ -1,0 +1,4 @@
+---
+# This makes linter to fully ignore rules/tags listed below
+skip_list:
+  - fqcn-builtins   # will enable when fqcn matures

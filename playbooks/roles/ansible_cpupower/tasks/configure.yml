@@ -1,0 +1,51 @@
+---
+- name: Check available governors
+  shell:
+    cmd: >-
+      {{ cpupower_bin }} frequency-info -g
+      | grep 'governors: '
+      | sed 's/  available cpufreq governors://g'
+    # Don't run it if cpupower is not installed yet
+    removes: "{{ cpupower_bin }}"
+  register: _cpupower_governors
+  check_mode: false
+  changed_when: false
+
+- block:
+  - name: Selected governor is supported
+    assert:
+      that:
+        - "(' ' + cpupower_governor) in _cpupower_governors.stdout"
+      fail_msg: >-
+        Selected governor '{{ cpupower_governor }}' is not supported.
+        {{ _cpupower_governors.stdout }}
+  
+  - name: Install start-up script
+    become: true
+    template:
+      dest: "{{ cpupower_startup_script_filename }}"
+      src: cpupower_apply.sh.j2
+      owner: root
+      group: root
+      mode: '0755'
+      backup: true
+    notify:
+      - cpupower-restart-service
+  
+  - name: Install systemd service
+    become: true
+    template:
+      dest: "/etc/systemd/system/cpupower.service"
+      src: cpupower.service.j2
+      owner: root
+      group: root
+      mode: '0644'
+      backup: true
+    register: _cpupower_service_config
+    notify:
+      - systemd-daemon-reload
+      - cpupower-restart-service
+
+  when:
+    - "not('skipped, ' in _cpupower_governors.stdout)"
+    - "not('Not Available' in _cpupower_governors.stdout)"

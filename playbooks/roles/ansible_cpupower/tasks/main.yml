@@ -1,0 +1,33 @@
+---
+- name: Pre-flight
+  import_tasks: preflight.yml
+  tags:
+    - cpupower
+    - cpupower_configure
+    - cpupower_install
+    - configure
+    - install
+
+- name: Uninstall
+  when: not (cpupower_installed | bool)
+  import_tasks: uninstall.yml
+  tags:
+    - cpupower
+    - cpupower_install
+    - install
+
+- name: Install
+  when: cpupower_installed | bool
+  import_tasks: install.yml
+  tags:
+    - cpupower
+    - cpupower_install
+    - install
+
+- name: Configure
+  when: cpupower_installed | bool
+  import_tasks: configure.yml
+  tags:
+    - cpupower
+    - cpupower_configure
+    - configure

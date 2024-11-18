@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# Start-up script that sets the desired cpufreq options which control
+# the CPU's power saving features
+#
+# {{ ansible_managed }}
+#
+{{ cpupower_bin }} frequency-set --governor {{ cpupower_governor | quote }} \
+{% if cpupower_governor in ['ondemand', 'conservative'] %}
+{%   if cpupower_frequency_max | default('auto') != 'auto' %}
+    --min {{ cpupower_frequency_max | quote }} \
+{%   endif %}
+{%   if cpupower_frequency_min | default('auto') != 'auto' %}
+    --max {{ cpupower_frequency_min | quote }} \
+{%   endif %}
+{% endif %}
+    --related
+{% if cpupower_governor in ['ondemand', 'conservative'] %}
+{%   if cpupower_ignore_nice_load | default('auto') != 'auto' %}
+echo {{ "1" if cpupower_ignore_nice_load | bool else "0" }} > {{
+    cpupower_cpufreq_sys_path }}/{{ cpupower_governor }}/ignore_nice_load
+{%   endif %}
+{%   if cpupower_sampling_rate | default('auto') != 'auto' %}
+echo {{ cpupower_sampling_rate | quote }} > {{
+    cpupower_cpufreq_sys_path }}/{{ cpupower_governor }}/sampling_rate
+{%   endif %}
+{%   if cpupower_up_threshold | default('auto') != 'auto' %}
+echo {{ cpupower_up_threshold | quote }} > {{
+    cpupower_cpufreq_sys_path }}/{{ cpupower_governor }}/up_threshold
+{%   endif %}
+{%   if cpupower_sampling_down_factor | default('auto') != 'auto' %}
+echo {{ cpupower_sampling_down_factor | quote }} > {{
+    cpupower_cpufreq_sys_path }}/{{ cpupower_governor }}/sampling_down_factor
+{%   endif %}
+{% endif %}
+{% if cpupower_governor in ['conservative'] %}
+{%   if cpupower_freq_step | default('auto') != 'auto' %}
+echo {{ cpupower_freq_step | quote }} > {{
+    cpupower_cpufreq_sys_path }}/{{ cpupower_governor }}/freq_step
+{%   endif %}
+{%   if cpupower_down_threshold | default('auto') != 'auto' %}
+echo {{ cpupower_down_threshold | quote }} > {{
+    cpupower_cpufreq_sys_path }}/{{ cpupower_governor }}/down_threshold
+{%   endif %}
+{% endif %}
