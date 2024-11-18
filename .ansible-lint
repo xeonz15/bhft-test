@@ -1,0 +1,9 @@
+﻿#https://ansible.readthedocs.io/projects/lint/configuring/#ansible-lint-configuration
+
+#Пропускаем тестирование зависимых ролей
+#mock_roles:
+
+exclude_paths:
+  - playbooks/roles/
+
+offline: true

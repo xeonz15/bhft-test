@@ -1,0 +1,5 @@
+luks_devices:
+   - device: /dev/xvdf
+     name: cryptodisk2
+     keyfile: /etc/luks-keys/dev-xvdf
+

@@ -1,0 +1,8 @@
+---
+- name: Test playbook
+  hosts: test_group
+  become: true
+
+
+  roles:
+    - setup_server
