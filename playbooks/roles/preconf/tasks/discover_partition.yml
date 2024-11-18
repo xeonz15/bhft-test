@@ -1,0 +1,65 @@
+- name: Get the root partition
+  shell: lsblk -o NAME,MOUNTPOINT -n -i -r | grep ' /$'
+  changed_when: false
+  register: root_partition_info
+
+- name: Extract the root partition name
+  set_fact:
+    root_partition: "{{ root_partition_info.stdout.split()[0] }}"
+
+- name: Get the next partition
+  shell: lsblk -o NAME -n -i -r | grep -A1 '^{{ root_partition }}$' | grep -v ^{{ root_partition }}$
+  changed_when: false
+  register: next_partition_info
+
+- name: Define the next partition device
+  set_fact:
+    next_partition: "/dev/{{ next_partition_info.stdout }}"
+  when: next_partition_info.stdout is defined and next_partition_info.stdout != ''
+
+- name: Handle case when there is no next partition
+  set_fact:
+    next_partition: None
+  when: next_partition_info.stdout is not defined or next_partition_info.stdout == ''
+
+- name: Set ingore cdroms
+  set_fact:
+    next_partition: None
+  when: next_partition in ['/dev/sr0','/dev/hdc']
+
+- name: Show root next partition
+  debug:
+    msg: "The partion next to root: {{ next_partition }}"
+
+- block:
+  - parted: device={{ next_partition }} unit=MiB
+    register: next_part_info
+
+  - debug:
+      msg: "{{ next_partition }} less than {{ min_part_size_to_encrypt }} MiB"
+    when: " next_part_info.disk.size  <  min_part_size_to_encrypt "
+
+  - name: Set ingore too small partitions
+    set_fact:
+      next_partition: None
+    when: " next_part_info.disk.size  <  min_part_size_to_encrypt "
+
+  when: next_partition != 'None'
+
+- block: 
+  - name: Create next_part dict
+    set_fact:
+      next_part_rec:
+       device: "{{ next_partition }}"
+       name: after-root-part
+       keyfile: /etc/luks-keys/after-root-keys
+
+  - name: Join next_part_rec to the list
+    set_fact:
+      luks_devices: "{{ luks_devices | community.general.lists_mergeby([next_part_rec], 'device') }}"
+
+  when: next_partition != 'None'
+
+#- name: Debug the dictionary
+#  debug:
+#    msg: "luks_devices: {{ luks_devices }}"

@@ -1,0 +1,16 @@
+---
+# handlers file for setup_server
+
+- name: Update grub
+  ansible.builtin.command:
+    cmd: "{{ grub_update_grub_command }}"
+  changed_when: true
+  when:
+    - ansible_connection not in [ "container", "docker", "community.docker.docker" ]
+  notify:
+    - Reboot
+
+- name: Reboot
+  ansible.builtin.reboot:
+  when:
+    - reboot_enable

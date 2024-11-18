@@ -1,0 +1,16 @@
+
+- name: Rename interface (netplan)
+  ansible.builtin.replace:
+    path: "{{ interface_config_file }}"
+    regexp: '{{ ansible_default_ipv4.interface }}'
+    replace: "{{ rename_interface_new_name }}"
+  when: rename_interface
+  notify: Reboot
+
+
+- name: Rename interface (systemd/network)
+  ansible.builtin.template:
+    src: 10-net0.link.j2
+    dest: /etc/systemd/network/10-{{ rename_interface_new_name }}.link
+    mode: '0644'
+  notify: Reboot

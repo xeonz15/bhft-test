@@ -1,0 +1,1 @@
+## Just an example role to setup a new server.

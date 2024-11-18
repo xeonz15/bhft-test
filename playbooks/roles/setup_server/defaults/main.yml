@@ -1,0 +1,25 @@
+---
+# defaults file for setup_server
+
+#grub options to disable c-states if cpu_c_state_disable=true
+#intel_idle.max_cstate=0 processor.max_cstate=0 idle=poll
+
+grub_options:
+  - option: intel_idle.max_cstate
+    value: 0
+  - option: processor.max_cstate
+    value: 0
+  - option: idle
+    value: poll
+
+#default not to disable cpu c-states
+cpu_c_state_disable: false
+
+#default not to reboot servers
+reboot_enable: false
+
+#default don't rename interface
+rename_interface: false
+
+rename_interface_new_name: net0
+

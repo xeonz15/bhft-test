@@ -1,0 +1,16 @@
+- name: Add options to GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="((:?(?!{{ item.option }}={{ item.value }}).)*?)"$'
+    replace: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ item.option }}={{ item.value }}"'
+    validate: /bin/sh %s
+    mode: "0664"
+  loop: "{{ grub_options }}"
+  loop_control:
+    label: "{{ item.option }}"
+  notify:
+    - Update grub
+  when:
+    - grub_options is defined
+    - grub_options | length > 0
+    - cpu_c_state_disable

@@ -1,0 +1,13 @@
+
+- debug: 
+    msg: "CPU List: {{ ansible_processor }}"
+
+- debug:
+    msg: "HyperThreading is active (threads_per_core = {{ ansible_processor_threads_per_core }})"
+  when: 
+    - ansible_facts['processor_threads_per_core'] > 1
+
+- debug:
+    msg: "HyperThreading is not active (threads_per_core = {{ ansible_processor_threads_per_core }})"
+  when: 
+    - ansible_facts['processor_threads_per_core'] == 1

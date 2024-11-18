@@ -1,0 +1,10 @@
+---
+# vars file for setup_server
+
+
+_grub_update_grub_command:
+  default: grub2-mkconfig -o /boot/grub2/grub.cfg
+  Alpine: grub-mkconfig -o /boot/grub/grub.cfg
+  Debian: update-grub
+
+grub_update_grub_command: "{{ _grub_update_grub_command[ansible_os_family] | default(_grub_update_grub_command['default']) }}"

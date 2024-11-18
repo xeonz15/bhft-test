@@ -1,0 +1,8 @@
+
+- debug:
+    msg: "Active interface: {{ ansible_default_ipv4.interface }}"
+
+- name: Configure network interface
+  ansible.builtin.import_tasks: network-ubuntu.yml
+  when:
+    - ansible_facts['distribution'] == "Ubuntu"

@@ -1,0 +1,5 @@
+---
+# defaults file for preconf
+
+#min partition size for encrypt, MB
+min_part_size_to_encrypt: 16

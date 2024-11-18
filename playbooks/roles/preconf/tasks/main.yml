@@ -1,0 +1,5 @@
+---
+# tasks file for preconf
+
+- name: Discovering partition next to root
+  ansible.builtin.import_tasks: discover_partition.yml
